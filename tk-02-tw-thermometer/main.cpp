@@ -37,7 +37,7 @@ float get_temperature_uart(){
     memset(buffer, 0x00, sizeof(buffer));
     SERIAL_RECV(buffer, 2);
     float temp;
-    temp = (float)buffer[0] + (float)(0.5f * buffer[1]);
+    temp = (float)buffer[0] + (float)(0.5 * buffer[1]);
     return temp;
 }
 
@@ -105,7 +105,7 @@ int main() {
 			float temp = get_temperature_uart();
 			set_led_color_based_on_temp(temp);
 			LCD_LOCATE(10,10);
-			LCD_PRINTF("%1f", temp);
+			LCD_PRINTF("%0.1f", temp);
 			wait(0.2);
 			LCD_CLS();
 		}
