@@ -34,7 +34,7 @@ float get_temperature_uart(){
 	SERIAL_RECV(buffer, 2);
 	/*LCD_LOCATE(5,5);
 	LCD_PRINTF("%d\n.%d\n", buffer[0], buffer[1]);*/
-	temp = (int8_t)buffer[0] + (float)(buffer[1]/pow(10,8));
+	temp = (float)buffer[0] + (float)(buffer[1]/pow(10,8));
 	LCD_CLS();
 	LCD_LOCATE(5,5);
 	LCD_PRINTF("%f/n", temp);
