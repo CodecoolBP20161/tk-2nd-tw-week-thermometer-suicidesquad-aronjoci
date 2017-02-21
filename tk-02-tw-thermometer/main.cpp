@@ -28,6 +28,18 @@ void send_temperature_uart(){
 
 }
 
+float get_temperature_uart(){
+	float temp;
+	char buffer[4];
+	memset(buffer, 0x00, sizeof(buffer));
+	SERIAL_RECV(buffer, 4);
+	int8_t _int_part = (int8_t)buffer[0];
+	temp = _int_part + (float)buffer[1]>>14;
+	LCD_LOCATE(5,5);
+	LCD_PRINTF("%f", temp);
+	return temp;
+}
+
 /*Turn off the red, green and blue component of the RGB LED,
  *because after initializing the RGB led components, they are turned in
  *by default*/
@@ -86,6 +98,10 @@ int main() {
 		if (JOYSTICK_LEFT == 1 ){
 			send_temperature_uart();
 		}
-		set_led_color_based_on_temp(34.0);
+		while(SERIAL_AVAILABLE() < 4 );
+		if (JOYSTICK_RIGHT == 1 ){
+			set_led_color_based_on_temp(get_temperature_uart());
+		}
+
 	}
 }
