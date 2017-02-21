@@ -36,7 +36,7 @@ float get_temperature_uart(){
     uint8_t buffer[16];
     memset(buffer, 0x00, sizeof(buffer));
     float temp;
-    temp = buffer[0] + 0.5f * buffer[1];
+    temp = (float)buffer[0] + 0.5f * buffer[1];
     return temp;
 }
 
