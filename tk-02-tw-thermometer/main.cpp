@@ -22,9 +22,14 @@ void send_temperature_uart(){
 	int8_t _int_part = (int8_t)buffer[0];
 	temp = _int_part + 0.5f * ((buffer[1]&0x80)>>7); /* save temperature as float */
 
+	char temp_data[4];
+	memcpy(temp_data,&temp,4);
+	SERIAL_SEND(temp_data, 4);
+	/*
 	char* temp_data;
     strncpy(temp_data,(char*) temp, 4);
     SERIAL_SEND(temp_data, 4);
+    */
 
 }
 
