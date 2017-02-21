@@ -18,7 +18,7 @@ void send_temperature_uart(){
 
 	memset(buffer, 0x00, sizeof(buffer)); /* Remove memory trash */
 	I2C_READ(LM75_ADDRESS, buffer, 2);
-
+	buffer[1] = 0.5f * ((buffer[1]&0x80)>>7);
 	SERIAL_SEND(buffer, 2);
 	LCD_CLS();
 	LCD_LOCATE(0,0);
@@ -34,8 +34,7 @@ float get_temperature_uart(){
 	SERIAL_RECV(buffer, 2);
 	/*LCD_LOCATE(5,5);
 	LCD_PRINTF("%d\n.%d\n", buffer[0], buffer[1]);*/
-	int8_t _int_part = (int8_t)buffer[0];
-	temp = _int_part + 0.5f * ((buffer[1]&0x80)>>7); /* save temperature as float */
+	temp = (int8_t)buffer[0] + (float)(buffer[1]/pow(10,8));
 	LCD_CLS();
 	LCD_LOCATE(5,5);
 	LCD_PRINTF("%f/n", temp);
