@@ -39,7 +39,7 @@ float get_temperature_uart(){
 	memset(buffer, 0x00, sizeof(buffer));
 	SERIAL_RECV(buffer, 4);
 	int8_t _int_part = (int8_t)buffer[0];
-	temp = _int_part + (float)buffer[1]>>14;
+	temp = _int_part + (float)buffer[1]/pow(10,14);
 	LCD_LOCATE(5,5);
 	LCD_PRINTF("%f", temp);
 	return temp;
