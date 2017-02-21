@@ -9,13 +9,14 @@
 void send_temperature_uart(){
 
 	I2C_FREQ(100000);
-
+	SERIAL_BAUD(9600);
+	SERIAL_SET_NON_BLOCKING();
 	uint8_t buffer[16];
 
 	buffer[0] = 0x00;
 	I2C_WRITE(LM75_ADDRESS, buffer, 1);
 
-	memset(buffer, 0x00, sizeof (buffer)); /* Remove memory trash */
+	memset(buffer, 0x00, sizeof(buffer)); /* Remove memory trash */
 	I2C_READ(LM75_ADDRESS, buffer, 2);
 
 	SERIAL_SEND(buffer, 2);
@@ -25,17 +26,19 @@ void send_temperature_uart(){
 }
 
 float get_temperature_uart(){
+	SERIAL_BAUD(9600);
+	SERIAL_SET_NON_BLOCKING();
 	float temp;
 	uint8_t buffer[16];
-	memset(buffer, 0x00, sizeof (buffer));
+	memset(buffer, 0x00, sizeof(buffer));
 	SERIAL_RECV(buffer, 2);
-	LCD_CLS();
-	LCD_LOCATE(5,5);
-	LCD_PRINTF("%d\n.%d\n", buffer[0], buffer[1]);
+	/*LCD_LOCATE(5,5);
+	LCD_PRINTF("%d\n.%d\n", buffer[0], buffer[1]);*/
 	int8_t _int_part = (int8_t)buffer[0];
 	temp = _int_part + 0.5f * ((buffer[1]&0x80)>>7); /* save temperature as float */
-	/*LCD_LOCATE(5,5);
-	LCD_PRINTF("%f/n", temp);*/
+	LCD_CLS();
+	LCD_LOCATE(5,5);
+	LCD_PRINTF("%f/n", temp);
 	return temp;
 }
 
@@ -93,6 +96,7 @@ void set_led_color_based_on_temp(float temp){
 }
 
 int main() {
+
 	while(1) {
 		if (JOYSTICK_LEFT == 1 ){
 			send_temperature_uart();
