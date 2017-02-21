@@ -37,7 +37,7 @@ float get_temperature_uart(){
     memset(buffer, 0x00, sizeof(buffer));
     SERIAL_RECV(buffer, 2);
     float temp;
-    temp = buffer[0] + 0.5f * buffer[1];
+    temp = buffer[0] + 0.5f * (float)buffer[1];
     return temp;
 }
 
