@@ -20,7 +20,7 @@ void send_temperature_uart(){
 
     buffer[0] = (int8_t)buffer[0];
     buffer[1] = (int8_t)((buffer[1]&0x80)>>7);
-
+    SERIAL_SEND(buffer, 2);
     LCD_CLS();
     LCD_LOCATE(0, 0);
     LCD_PRINTF("Temperature: %d %d",
@@ -35,6 +35,7 @@ float get_temperature_uart(){
     SERIAL_SET_NON_BLOCKING();
     uint8_t buffer[16];
     memset(buffer, 0x00, sizeof(buffer));
+    SERIAL_RECV(buffer, 2);
     float temp;
     temp = (float)buffer[0] + 0.5f * buffer[1];
     return temp;
