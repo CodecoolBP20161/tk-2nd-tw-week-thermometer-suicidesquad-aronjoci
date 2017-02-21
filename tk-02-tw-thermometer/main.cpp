@@ -10,9 +10,8 @@ void send_temperature_uart(){
     I2C_FREQ(100000);
     SERIAL_BAUD(9600);
     SERIAL_SET_NON_BLOCKING();
-
+    float temp;
     uint8_t buffer[16];
-    buffer[0] = 0x00;
     I2C_WRITE(LM75_ADDRESS, buffer, 1);
 
     memset(buffer, 0x00, sizeof (buffer));
@@ -20,12 +19,14 @@ void send_temperature_uart(){
 
 
     buffer[0] = (int8_t)buffer[0];
-    buffer[1] = (int8_t)(0.5f * ((buffer[1]&0x80)>>7));
+    buffer[1] = (int8_t)((buffer[1]&0x80)>>7);
 
     LCD_CLS();
     LCD_LOCATE(0, 0);
-    LCD_PRINTF("Temperature: %02X %02X",
-    		buffer[0], buffer[1]);
+    LCD_PRINTF("Temperature: %d %d",
+    		 buffer[0], buffer[1]);
+
+	wait(1);
 
 }
 
@@ -33,8 +34,9 @@ float get_temperature_uart(){
     SERIAL_BAUD(9600);
     SERIAL_SET_NON_BLOCKING();
     uint8_t buffer[16];
+    memset(buffer, 0x00, sizeof(buffer));
     float temp;
-    temp = (float)buffer[0] + (float)buffer[1]/10;
+    temp = buffer[0] + 0.5 * buffer[1]/10;
     return temp;
 }
 
@@ -96,8 +98,6 @@ int main() {
 	while(1) {
 		if (JOYSTICK_LEFT == 1 ){
 			send_temperature_uart();
-			while(SERIAL_AVAILABLE() < 2 );
-			wait(0.2);
 			LCD_CLS();
 		}
 		if (JOYSTICK_RIGHT == 1 ){
