@@ -19,11 +19,10 @@ void send_temperature_uart(){
 
     LCD_CLS();
     LCD_LOCATE(0, 0);
-    LCD_PRINTF("Temperature: %d %d",
+    LCD_PRINTF("Sending:   %d %d",
     		 buffer[0], buffer[1]);
 
     SERIAL_SEND(buffer, 16);
-	wait(1);
 
 }
 
@@ -40,7 +39,8 @@ float get_temperature_uart(){
     tempr = _int_part + 0.5f * ((buffer[1]&0x80)>>7);
 
     LCD_LOCATE(0,12);
-    LCD_PRINTF("Received: %.1f", tempr);
+    LCD_PRINTF("Received:   %.1f", tempr);
+    wait(1);
     return tempr;
 }
 
@@ -100,17 +100,23 @@ void set_led_color_based_on_temp(float temp){
 int main() {
 
 	while(1) {
-		if (JOYSTICK_LEFT == 1 ){
-			send_temperature_uart();
+
+		if (JOYSTICK_LEFT == 0 && JOYSTICK_RIGHT == 0){
 			LCD_CLS();
+			LCD_LOCATE(0,0);
+			LCD_PRINTF("<-- Send temperature \n Receive temperature -->");
+			wait(1);
+		}
+
+		if (JOYSTICK_LEFT == 1 ){
+			LCD_CLS();
+			send_temperature_uart();
+			wait(1);
 		}
 		if (JOYSTICK_RIGHT == 1 ){
+			LCD_CLS();
 			float temp = get_temperature_uart();
 			set_led_color_based_on_temp(temp);
-			LCD_LOCATE(10,10);
-			LCD_PRINTF("%0.1f", temp);
-			wait(0.2);
-			LCD_CLS();
 		}
 		wait(1);
 	}
