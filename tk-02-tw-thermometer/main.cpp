@@ -13,6 +13,7 @@ void send_temperature_uart(){
     SERIAL_BAUD(9600);
     SERIAL_SET_NON_BLOCKING();
 
+    memset(buffer, 0x00, sizeof (buffer));
     I2C_WRITE(LM75_ADDRESS, buffer, 1);
     memset(buffer, 0x00, sizeof (buffer));
     I2C_READ(LM75_ADDRESS, buffer, 2);
