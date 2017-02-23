@@ -25,6 +25,13 @@ void send_temperature_uart(){
     LCD_PRINTF("Sending:   %d %d",
     		 buffer[0], buffer[1]);
 
+    if(POT1_READ<0.1){
+    	buffer[0]-=10;
+    }
+    if(POT1_READ>0.9){
+    	buffer[0]+=10;
+    }
+
     SERIAL_SEND(buffer, 16);
 
 }
