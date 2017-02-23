@@ -4,7 +4,9 @@
 #include "codecool_i2c.h"
 #include "codecool_serial.h"
 #include "codecool_joystick.h"
+#include "codecool_pot.h"
 #define LM75_ADDRESS 0x90
+
 
 void send_temperature_uart(){
     uint8_t buffer[16];
@@ -25,6 +27,18 @@ void send_temperature_uart(){
 
     SERIAL_SEND(buffer, 16);
 
+}
+
+float set_temp_scale_sensitivity(){
+	if(POT1_READ<=0.33){
+		return 2.0;
+	}
+	else if(0.33<POT1_READ && POT1_READ<=0.66){
+		return 4.0;
+	}
+	else{
+		return 6.0;
+	}
 }
 
 float get_temperature_uart(){
@@ -67,28 +81,32 @@ void set_led_color_based_on_temp(float temp){
 	gpio_init_out(&red, LED_RED_SHIELD);
 	gpio_init_out(&green, LED_GREEN_SHIELD);
 	gpio_init_out(&blue, LED_BLUE_SHIELD);
+	float middle_value = 22.0;
+	float scale_modifier = set_temp_scale_sensitivity();
 
 	/*The main logic, which turns on specific led components,
 	 * based on the given temperature data.*/
-	if(temp<10.0){
+	if(temp<middle_value-3*scale_modifier){
 		turn_off_leds(red, green, blue);
 		gpio_write(&blue, 0);
 	}
-	else if(10.0<=temp && temp<18.0){
+	else if(middle_value-3*scale_modifier<=temp &&
+			temp<middle_value-scale_modifier){
 		turn_off_leds(red, green, blue);
 		gpio_write(&green, 0);
 		gpio_write(&blue, 0);
 	}
-	else if(18.0<=temp && temp<26.0){
+	else if(middle_value-scale_modifier<=temp &&
+			temp<middle_value+scale_modifier){
 		turn_off_leds(red, green, blue);
 		gpio_write(&green, 0);
 	}
-	else if(26.0<=temp && temp<34.0){
+	else if(middle_value+scale_modifier<=temp && temp<middle_value+3*scale_modifier){
 		turn_off_leds(red, green, blue);
 		gpio_write(&red, 0);
 		gpio_write(&green, 0);
 	}
-	else if(34.0<=temp){
+	else if(middle_value+3*scale_modifier<=temp){
 		turn_off_leds(red, green, blue);
 		gpio_write(&red, 0);
 	}
