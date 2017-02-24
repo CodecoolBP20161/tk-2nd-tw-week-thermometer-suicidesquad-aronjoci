@@ -2,6 +2,7 @@
 #include "codecool/codecool_shield_names.h"
 #include "codecool/codecool_lcd.h"
 #include "codecool_i2c.h"
+#include "codecool_pwm.h"
 #include "codecool_serial.h"
 #include "codecool_joystick.h"
 #include "codecool_pot.h"
@@ -10,21 +11,24 @@
 
 void send_temperature_uart(){
     uint8_t buffer[16];
-
+    /*Initializations to temperature sensor and UART communication*/
     I2C_FREQ(100000);
     SERIAL_BAUD(9600);
     SERIAL_SET_NON_BLOCKING();
 
+    /*Set buffer to zero and get temperature data*/
     memset(buffer, 0x00, sizeof (buffer));
     I2C_WRITE(LM75_ADDRESS, buffer, 1);
     memset(buffer, 0x00, sizeof (buffer));
     I2C_READ(LM75_ADDRESS, buffer, 2);
 
+    /*Print the sent temperature data*/
     LCD_CLS();
     LCD_LOCATE(0, 0);
     LCD_PRINTF("Sending:   %d %d",
     		 buffer[0], buffer[1]);
 
+    /*Manipulate the temperature data on the sender side by +-10 based on POT1 value*/
     if(POT1_READ<0.1){
     	buffer[0]-=10;
     }
@@ -32,10 +36,13 @@ void send_temperature_uart(){
     	buffer[0]+=10;
     }
 
+    /*Send the temperature data over UART*/
     SERIAL_SEND(buffer, 16);
 
 }
 
+/*Based on POT1 value it returns the distance of the scale limits from
+ * the middle value*/
 float set_temp_scale_sensitivity(){
 	if(POT1_READ<=0.33){
 		return 2.0;
@@ -52,14 +59,19 @@ float get_temperature_uart(){
     float tempr;
     uint8_t buffer[16];
 
+    /*Initializations to temperature sensor and UART communication*/
     SERIAL_BAUD(9600);
     SERIAL_SET_NON_BLOCKING();
 
+    /*Set buffer to zero and receive the temperature data over UART*/
     memset(buffer, 0x00, sizeof(buffer));
     SERIAL_RECV(buffer, 16);
+
+    /*Transform th temperature data to the necessary form.*/
     int8_t _int_part = (int8_t)buffer[0];
     tempr = _int_part + 0.5f * ((buffer[1]&0x80)>>7);
 
+    /*Print the received temerature data.*/
     LCD_LOCATE(0,12);
     LCD_PRINTF("Received:   %.1f", tempr);
     wait(1);
@@ -126,19 +138,21 @@ void set_led_color_based_on_temp(float temp){
 int main() {
 
 	while(1) {
-
+		/*Print the instructions on the LCD, a out how can you put a device to
+		 * sender and to receiver state*/
 		if (JOYSTICK_LEFT == 0 && JOYSTICK_RIGHT == 0){
 			LCD_CLS();
 			LCD_LOCATE(0,0);
 			LCD_PRINTF("<-- Send temperature \n Receive temperature -->");
 			wait(1);
 		}
-
+		/*Send temperature data over UART*/
 		if (JOYSTICK_LEFT == 1 ){
 			LCD_CLS();
 			send_temperature_uart();
 			wait(1);
 		}
+		/*Get temperature data over UART*/
 		if (JOYSTICK_RIGHT == 1 ){
 			LCD_CLS();
 			float temp = get_temperature_uart();
